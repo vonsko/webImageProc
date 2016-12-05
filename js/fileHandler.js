@@ -1,12 +1,11 @@
 /* global */
 
 var fileHandler = (function () {
-	var config = {};
+	// var config = {};
 	var dropzonehandlers = {
 		// handlers for dropzone
 		drop: function (e) {
 			e.target.classList.remove("dropzonehover");
-			fileHandler.loadFiles(e);
 			e.preventDefault();
 		},
 		dragover: function (e) {
@@ -18,48 +17,31 @@ var fileHandler = (function () {
 			e.preventDefault();
 		}
 	};
-	function bindHandlers () {
-
+	function getFiles (event) {
+		return event.dataTransfer ? event.dataTransfer.files : event.target.files;
 	}
-	function loadFiles (e) {
-		// preventing default behaviour - because drop navigate to dropped file
-		e.preventDefault();
-		// changing files collection
-		var files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-		// clearing gallery container every time
-		domHandler.clearThumbnailGallery();
-		// processing each file…
-		for (var i = 0; i < files.length; i++) {
-			fileHandler.processFile(files[i]);
-		}
-	}
-	function processFile (file) {
-		// … mostly validating for name and size
-		if(fileHandler.checkFileType(file) && fileHandler.checkFileSize(file)) {
-			// initializing fileReader api
+	function getBase64Image(file) {
+		return new Promise (function (resolve, reject) {
 			var reader = new FileReader();
-			// overriding readers load event
-			reader.onload = galleryModule.loadedImageHandler;
-			// reading file by reader and converting to base64
+			reader.onload = function (e) {
+				resolve(e.target.result);
+			};
 			reader.readAsDataURL(file);
-		} else {
-			// place for handling files other than images
-			console.warn("coming thru, not an suitable image file", file.name);
-		}
+		});
 	}
-	function checkFileType (file) {
-		// checking if provided file is proper image file, via regexp
-		var typesAllowed = config.fileTypesAllowed;
+	function validateFile (file, config) {
+		return checkFileType(file, config.fileTypesAllowed) && checkFileSize(file, config.fileSizeAllowed);
+	}
+	function checkFileType (file, typesAllowed) {
 		return new RegExp("\\.("+typesAllowed+")$", "i").test(file.name);
 	}
-	function checkFileSize (file) {
-		// check if file size is not exceeding acceptable file size (5mb)
-		return file.size < config.fileSizeAllowed;
+	function checkFileSize (file, sizeAllowed) {
+		return file.size < sizeAllowed;
 	}
 	return {
-		init: init,
-		loadFiles: loadFiles,
-		processFile: processFile,
+		getFiles: getFiles,
+		getBase64Image: getBase64Image,
+		validateFiles: validateFile,
 		checkFileType: checkFileType,
 		checkFileSize: checkFileSize,
 		dropZoneHandlers: dropzonehandlers

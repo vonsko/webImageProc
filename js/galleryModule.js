@@ -1,26 +1,25 @@
 /* global */
 
-var galleryModule = (function (helpersModule, domHandler) {
+var galleryModule = (function () {
 	var config = {};
 	function init (input) {
 		config = input;
+		bindEvents();
 	}
-	function loadedImageHandler (event) {
-		processLoadedImage(event.target.result);
+	function bindEvents() {
+		document.querySelector(config.imageProcessorFileInput).addEventListener("change", galleryModuleHandler, false);
+		document.querySelector(config.dropZoneSelector).addEventListener("drop", galleryModuleHandler, false);
+		document.querySelector(config.dropZoneSelector).addEventListener("dragover", fileHandler.dropZoneHandlers.dragover, false);
+		document.querySelector(config.dropZoneSelector).addEventListener("dragleave", fileHandler.dropZoneHandlers.dragleave, false);
 	}
-	function processLoadedImage (imageBase64) {
-		// creating new Image Object
-		var img = new Image();
-		// overriding default "load" events
-		img.onload = function (e) {
-			var thumbnail = createCanvasThumbnail(e.target);
-			domHandler.appendThumbnail(thumbnail);
-		};
-		// assigning base64 image which automatically trigger above method
-		img.src = imageBase64;
+	function galleryModuleHandler (event) {
+		event.preventDefault();
+		event.target.classList.remove("dropzonehover");
+		domHandler.clearContainer(config.imageGallerySelector);
+		createGalleryFromFiles(fileHandler.getFiles(event));
 	}
 	function createCanvasThumbnail(img) {
-		var ratio = helpersModule.calculateRatio(img);
+		var ratio = helpersModule.calculateRatio(img, config.thumbSize);
 		// creating new canvas element
 		var canvasElement = document.createElement("canvas");
 		var ctx = canvasElement.getContext("2d");
@@ -37,11 +36,26 @@ var galleryModule = (function (helpersModule, domHandler) {
 
 		return canvasElement;
 	}
-	// public methods
+	function createGalleryFromFiles (files) {
+		for(var i = 0; i < files.length; i++) {
+			// if(fileHandler.valid)
+			if (fileHandler.validateFiles(files[i], config)) {
+				fileHandler.getBase64Image(files[i]).then(function (res) {
+					domHandler.getImageElement(res).then(function (result) {
+						domHandler.appendThumbnail(createCanvasThumbnail(result), config.imageGallerySelector);
+					});
+				});
+			} else {
+				domHandler.getImageElement(config.errorFile).then(function (result) {
+					domHandler.appendThumbnail(createCanvasThumbnail(result), config.imageGallerySelector);
+				});
+			}
+		}
+	}
+
 	return {
 		init: init,
-		loadedImageHandler: loadedImageHandler,
-		processLoadedImage: processLoadedImage,
+		createGalleryFromFiles: createGalleryFromFiles,
 		createCanvasThumbnail: createCanvasThumbnail
 	};
-}(helpersModule, domHandler));
+}());

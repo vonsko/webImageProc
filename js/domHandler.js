@@ -20,22 +20,21 @@ var domHandler = (function () {
 		thumbElement.addEventListener("click", thumbnailClickHandler ,false);
 		galleryElement.appendChild(thumbElement);
 	}
-	function wrapThumbnail(image) {
+	function createThumbnail(image) {
 		var thumbnailElement = document.createElement("a");
 		thumbnailElement.classList.add("thumbnail");
 		thumbnailElement.setAttribute("title", "click to enlarge");
 		thumbnailElement.appendChild(image);
+		thumbnailElement.addEventListener("click", thumbnailClickHandler ,false);
 
 		return thumbnailElement;
 	}
-	function getImageElement (source) {
-		return new Promise (function (resolve, reject) {
-			var img = new Image();
-			img.onload = function (e) {
-				resolve(img);
-			};
-			img.src = source;
-		});
+	function getImageElement (source, outputCallback) {
+		var img = new Image();
+		img.onload = function (e) {
+			outputCallback(img);
+		};
+		img.src = source;
 	}
 	return {
 		clearContainer: clearContainer,
@@ -44,7 +43,7 @@ var domHandler = (function () {
 		buildPopup: buildPopup,
 		openImagePopup: openImagePopup,
 		appendThumbnail: appendThumbnail,
-		wrapThumbnail: wrapThumbnail
+		createThumbnail: createThumbnail
 	};
 }());
 

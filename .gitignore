@@ -1,7 +1,7 @@
 .DS_Store
-bower_components
-node_modules
+/node_modules/
 npm-debug.log
-etc
-scss
-.idea
+/etc/
+/.idea/
+/scss/
+/bower_components/

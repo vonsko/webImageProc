@@ -1,16 +1,11 @@
 /* global */
 
 var domHandler = (function () {
-	var config = {};
-	function init (input) {
-		config = input;
-		domHandler.bindEvents();
-	}
-	function clearThumbnailGallery() {
-		document.querySelector(config.imageGallerySelector).innerHTML = "";
+	function clearContainer(gallerySelector) {
+		document.querySelector(gallerySelector).innerHTML = "";
 	}
 	function thumbnailClickHandler(e) {
-		domHandler.openImagePopup(domHandler.buildPopup(e.target.originalFile));
+		openImagePopup(domHandler.buildPopup(e.target.originalFile));
 	}
 	function buildPopup (content) {
 		return "<img src='" + content + "'/>";
@@ -19,10 +14,10 @@ var domHandler = (function () {
 		var newWindow = window.open("", "","scrollbars=0, toolbar=0");
 		newWindow.document.write(content);
 	}
-	function appendThumbnail(image) {
-		var galleryElement = document.querySelector(config.imageGallerySelector);
-		var thumbElement = domHandler.wrapThumbnail(image);
-		thumbElement.addEventListener("click", domHandler.thumbnailClickHandler ,false);
+	function appendThumbnail(image, destination) {
+		var galleryElement = document.querySelector(destination);
+		var thumbElement = wrapThumbnail(image);
+		thumbElement.addEventListener("click", thumbnailClickHandler ,false);
 		galleryElement.appendChild(thumbElement);
 	}
 	function wrapThumbnail(image) {
@@ -33,22 +28,23 @@ var domHandler = (function () {
 
 		return thumbnailElement;
 	}
-	function bindEvents() {
-		// @todo: input selector to config
-		document.querySelector(config.imageProcessorFileInput).addEventListener("change", fileHandler.loadFiles, false);
-		document.querySelector(config.dropZoneSelector).addEventListener("drop", fileHandler.dropZoneHandlers.drop, false);
-		document.querySelector(config.dropZoneSelector).addEventListener("dragover", fileHandler.dropZoneHandlers.dragover, false);
-		document.querySelector(config.dropZoneSelector).addEventListener("dragleave", fileHandler.dropZoneHandlers.dragleave, false);
+	function getImageElement (source) {
+		return new Promise (function (resolve, reject) {
+			var img = new Image();
+			img.onload = function (e) {
+				resolve(img);
+			};
+			img.src = source;
+		});
 	}
 	return {
-		init: init,
-		clearThumbnailGallery: clearThumbnailGallery,
+		clearContainer: clearContainer,
 		thumbnailClickHandler: thumbnailClickHandler,
+		getImageElement: getImageElement,
 		buildPopup: buildPopup,
 		openImagePopup: openImagePopup,
 		appendThumbnail: appendThumbnail,
-		wrapThumbnail: wrapThumbnail,
-		bindEvents: bindEvents
+		wrapThumbnail: wrapThumbnail
 	};
 }());
 

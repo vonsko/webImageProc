@@ -1,6 +1,6 @@
 /* global */
 
-var imageProcessor = (function (galleryModule, domHandler, fileHandler, helpersModule) {
+function imageProcessor () {
 	var defaultConfig = {
 		thumbSize: 150,
 		imageGallerySelector: "#mainArea",
@@ -13,9 +13,10 @@ var imageProcessor = (function (galleryModule, domHandler, fileHandler, helpersM
 	var config = {};
 	function init (inputConfig) {
 		config = Object.assign({}, defaultConfig, inputConfig);
-		galleryModule.init(config);
+		var gallery = new galleryModule();
+		gallery.init(config);
 	}
 	return {
 		init: init
 	};
-}(galleryModule, domHandler, fileHandler, helpersModule));
+}

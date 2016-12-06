@@ -1,16 +1,18 @@
 /* global */
 
-var galleryModule = (function () {
+function galleryModule () {
 	var config = {};
+	var $ = document.querySelector.bind(document);
 	function init (input) {
 		config = input;
 		bindEvents();
 	}
 	function bindEvents() {
-		document.querySelector(config.imageProcessorFileInput).addEventListener("change", galleryModuleHandler, false);
-		document.querySelector(config.dropZoneSelector).addEventListener("drop", galleryModuleHandler, false);
-		document.querySelector(config.dropZoneSelector).addEventListener("dragover", fileHandler.dropZoneHandlers.dragover, false);
-		document.querySelector(config.dropZoneSelector).addEventListener("dragleave", fileHandler.dropZoneHandlers.dragleave, false);
+		var $dropzone = $(config.dropZoneSelector);
+		$(config.imageProcessorFileInput).addEventListener("change", galleryModuleHandler, false);
+		$dropzone.addEventListener("drop", galleryModuleHandler, false);
+		$dropzone.addEventListener("dragover", fileHandler.dropZoneHandlers.dragover, false);
+		$dropzone.addEventListener("dragleave", fileHandler.dropZoneHandlers.dragleave, false);
 	}
 	function galleryModuleHandler (event) {
 		event.preventDefault();
@@ -38,16 +40,15 @@ var galleryModule = (function () {
 	}
 	function createGalleryFromFiles (files) {
 		for(var i = 0; i < files.length; i++) {
-			// if(fileHandler.valid)
 			if (fileHandler.validateFiles(files[i], config)) {
-				fileHandler.getBase64Image(files[i]).then(function (res) {
-					domHandler.getImageElement(res).then(function (result) {
-						domHandler.appendThumbnail(createCanvasThumbnail(result), config.imageGallerySelector);
+				fileHandler.getFileContent(files[i], function (res) {
+					domHandler.getImageElement(res, function (result) {
+						$(config.imageGallerySelector).appendChild(domHandler.createThumbnail(createCanvasThumbnail(result)));
 					});
 				});
 			} else {
-				domHandler.getImageElement(config.errorFile).then(function (result) {
-					domHandler.appendThumbnail(createCanvasThumbnail(result), config.imageGallerySelector);
+				domHandler.getImageElement(config.errorFile, function (result) {
+					$(config.imageGallerySelector).appendChild(domHandler.createThumbnail(createCanvasThumbnail(result)));
 				});
 			}
 		}
@@ -58,4 +59,4 @@ var galleryModule = (function () {
 		createGalleryFromFiles: createGalleryFromFiles,
 		createCanvasThumbnail: createCanvasThumbnail
 	};
-}());
+}

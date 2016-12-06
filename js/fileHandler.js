@@ -20,14 +20,12 @@ var fileHandler = (function () {
 	function getFiles (event) {
 		return event.dataTransfer ? event.dataTransfer.files : event.target.files;
 	}
-	function getBase64Image(file) {
-		return new Promise (function (resolve, reject) {
-			var reader = new FileReader();
-			reader.onload = function (e) {
-				resolve(e.target.result);
-			};
-			reader.readAsDataURL(file);
-		});
+	function getFileContent(file, outputCallback) {
+		var reader = new FileReader();
+		reader.onload = function (e) {
+			outputCallback(e.target.result);
+		};
+		reader.readAsDataURL(file);
 	}
 	function validateFile (file, config) {
 		return checkFileType(file, config.fileTypesAllowed) && checkFileSize(file, config.fileSizeAllowed);
@@ -40,7 +38,7 @@ var fileHandler = (function () {
 	}
 	return {
 		getFiles: getFiles,
-		getBase64Image: getBase64Image,
+		getFileContent: getFileContent,
 		validateFiles: validateFile,
 		checkFileType: checkFileType,
 		checkFileSize: checkFileSize,
